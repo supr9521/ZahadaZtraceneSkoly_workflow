@@ -1,0 +1,134 @@
+from typing import Any, Dict
+
+
+def inicializuj_stav() -> Dict[str, Any]:
+    """Vytvoří a vrátí výchozí stav hry.
+
+    Returns:
+        Slovník reprezentující stav hry (poloha, inventář, aktivita).
+    """
+    return {
+        "aktualni_mistnost": "vestibul",
+        "inventar": [],
+        "hra_bezi": True
+    }
+
+
+def vypis_popis(stav: Dict[str, Any]) -> None:
+    """Vypíše do terminálu textový popis aktuální místnosti a možností.
+
+    Args:
+        stav: Slovník s aktuálním stavem hry.
+    """
+    mistnost = stav["aktualni_mistnost"]
+    
+    if mistnost == "vestibul":
+        print("\nStojíš ve vestibulu školy. Hlavní dveře ven jsou zamčené.")
+        print("Můžeš jít na sever (kabinet) nebo na západ (učebna).")
+        
+    elif mistnost == "ucebna":
+        print("\nPřesunul ses do učebny. Na katedře leží rezavý klíč.")
+        print("Můžeš jít na východ (vestibul).")
+        
+    elif mistnost == "kabinet":
+        print("\nJsi v kabinetu. Na tabuli je napsáno: Klíč je v učebně.")
+        print("Můžeš jít na jih (vestibul).")
+
+
+def zpracuj_pohyb(smer: str, stav: Dict[str, Any]) -> None:
+    """Ošetří logiku přesunu mezi místnostmi.
+    Args:
+        smer: Cílový směr zadaný uživatelem.
+        stav: Slovník s aktuálním stavem hry.
+    """
+    
+    mistnost = stav["aktualni_mistnost"]
+
+    if mistnost == "vestibul" and smer == "sever": 
+        stav["aktualni_mistnost"] = "kabinet"
+        
+    elif mistnost == "kabinet" and smer == "jih": 
+        stav["aktualni_mistnost"] = "vestibul"
+        
+    elif mistnost == "vestibul" and smer == "zapad": 
+        stav["aktualni_mistnost"] = "ucebna"
+        
+    elif mistnost == "ucebna" and smer == "vychod":
+        stav["aktualni_mistnost"] = "vestibul"
+        
+    else: 
+        print("Tímto směrem se odsud nedostaneš.")
+    
+ 
+    mistnost = stav["aktualni_mistnost"]
+    
+    # TODO: Pomocí podmínek if-elif-else implementujte logiku přechodů:
+    # - Z vestibulu lze jít na "sever" (kabinet) nebo "zapad" (ucebna)
+    # - Z učebny lze jít na "vychod" (vestibul)
+    # - Z kabinetu lze jít na "jih" (vestibul)
+    # Pokud směr neexistuje, vypište chybovou hlášku.
+    pass
+
+
+def zpracuj_akci(akce: str, stav: Dict[str, Any]) -> None:
+    """Zpracuje nekonečné akce jako sbírání předmětů nebo použití klíče.
+
+    Args:
+        akce: Textový příkaz uživatele (např. "seber klic").
+        stav: Slovník s aktuálním stavem hry.
+    """
+    
+    mistnost = stav ["aktualni_mistnost"] if stav["aktualni_mistnost"] == "vestibul" else stav["aktualni_mistnost"]
+    
+    if akce == "seber klic":
+    
+        if mistnost == "ucebna" and "klic" not in stav["inventar"]:
+            stav["inventar"].append("klic")
+            print("Sebral jsi klíč. Nyní ho máš v inventáři.")
+        else:
+            print("Zde není nic k sebrání.")
+            
+    elif akce == "pouzij klic":
+        # TODO: Implementujte logiku použití klíče:
+        # - Pokud je hráč ve vestibulu a má klíč v inventáři, vyhrává (hra_bezi = False).
+        # - Pokud klíč nemá nebo je v jiné místnosti, vypište příslušné texty.
+        pass 
+    vestbul = stav["aktualni_mistnost"] == "vestibul"
+    if akce == "pouzij klic":
+        if vestbul and "klic" in stav["inventar"]:
+            print("Použil jsi klíč a odemkl hlavní dveře! Gratuluji, vyhrál jsi!")
+            stav["hra_bezi"] = False
+        elif vestbul:
+            print("Nemáš klíč, abys mohl odemknout dveře.")
+        else:
+            print("Klíč nemůžeš použít tady.")
+        
+    else:
+        print("Nerozpoznaný příkaz. Zkus to znovu.")
+
+
+def hlavni_smycka() -> None:
+    """Řídí hlavní cyklus hry (načítání vstupu, vyhodnocení)."""
+    stav = inicializuj_stav()
+    print("Vítej ve hře Útěk ze školy!")
+    
+    while stav["hra_bezi"]:
+        vypis_popis(stav)
+        
+        # Načtení vstupu, převedení na malá písmena a odstranění bílých znaků
+        vstup = input("\nZadej příkaz: ").strip().lower()
+        
+        if vstup == "konec":
+            stav["hra_bezi"] = False
+            print("Hra byla ukončena uživatelem.")
+            
+        elif vstup.startswith("jdi "):
+            smer = vstup.replace("jdi ", "").strip()
+            zpracuj_pohyb(smer, stav)
+            
+        else:
+            zpracuj_akci(vstup, stav)
+
+
+if __name__ == "__main__":
+    hlavni_smycka()
