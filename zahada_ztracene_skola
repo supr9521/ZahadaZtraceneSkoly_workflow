@@ -37,14 +37,29 @@ def vypis_popis(stav: Dict[str, Any]) -> None:
 
 def zpracuj_pohyb(smer: str, stav: Dict[str, Any]) -> None:
     """Ošetří logiku přesunu mezi místnostmi.
-        if mistnost == "vestibul":
-        if smer == "sever": [aktualni_mistnost] = "kabinet"
-        elif smer == "zapad": [aktualni_mistnost] = "ucebna"
-        else: print("Tímto směrem se odsud nedostaneš.")
     Args:
         smer: Cílový směr zadaný uživatelem.
         stav: Slovník s aktuálním stavem hry.
     """
+    
+    mistnost = stav["aktualni_mistnost"]
+
+    if mistnost == "vestibul" and smer == "sever": 
+        stav["aktualni_mistnost"] = "kabinet"
+        
+    elif mistnost == "kabinet" and smer == "jih": 
+        stav["aktualni_mistnost"] = "vestibul"
+        
+    elif mistnost == "vestibul" and smer == "zapad": 
+        stav["aktualni_mistnost"] = "ucebna"
+        
+    elif mistnost == "ucebna" and smer == "vychod":
+        stav["aktualni_mistnost"] = "vestibul"
+        
+    else: 
+        print("Tímto směrem se odsud nedostaneš.")
+    
+ 
     mistnost = stav["aktualni_mistnost"]
     
     # TODO: Pomocí podmínek if-elif-else implementujte logiku přechodů:
@@ -62,9 +77,11 @@ def zpracuj_akci(akce: str, stav: Dict[str, Any]) -> None:
         akce: Textový příkaz uživatele (např. "seber klic").
         stav: Slovník s aktuálním stavem hry.
     """
+    
     mistnost = stav ["aktualni_mistnost"] if stav["aktualni_mistnost"] == "vestibul" else stav["aktualni_mistnost"]
     
     if akce == "seber klic":
+    
         if mistnost == "ucebna" and "klic" not in stav["inventar"]:
             stav["inventar"].append("klic")
             print("Sebral jsi klíč. Nyní ho máš v inventáři.")
@@ -106,7 +123,7 @@ def hlavni_smycka() -> None:
             print("Hra byla ukončena uživatelem.")
             
         elif vstup.startswith("jdi "):
-            smer = vstup.replace("jdi ", "sever").replace("jdi ", "jih").replace("jdi ", "vychod").replace("jdi ", "zapad")
+            smer = vstup.replace("jdi ", "").strip()
             zpracuj_pohyb(smer, stav)
             
         else:
